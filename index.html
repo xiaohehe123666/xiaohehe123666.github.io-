@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python智解库 · 终极版</title>
+
+<style>
+
+/* ===== 全局 ===== */
+body{
+    margin:0;
+    font-family:-apple-system;
+    background:#0f172a;
+    color:#e2e8f0;
+}
+
+/* 顶栏 */
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    padding:15px 25px;
+    background:#020617;
+    box-shadow:0 2px 10px rgba(0,0,0,0.5);
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.logo img{height:32px;}
+
+.navbar div{
+    margin-left:20px;
+    cursor:pointer;
+}
+.navbar div:hover{
+    color:#60a5fa;
+}
+
+/* 布局 */
+.container{
+    display:flex;
+}
+
+/* 侧边栏 */
+.sidebar{
+    width:220px;
+    background:#020617;
+    padding:20px;
+    border-right:1px solid #1e293b;
+}
+.sidebar div{
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.sidebar div:hover{
+    background:#1e293b;
+}
+
+/* 主体 */
+.main{
+    flex:1;
+    padding:20px;
+}
+
+.search{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    background:#1e293b;
+    color:#fff;
+}
+
+/* 卡片 */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:15px;
+    margin-top:20px;
+}
+
+.card{
+    background:linear-gradient(135deg,#1e293b,#334155);
+    padding:15px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:0.3s;
+}
+.card:hover{
+    transform:translateY(-5px);
+}
+
+/* 弹窗 */
+.modal{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    display:none;
+    justify-content:center;
+}
+
+.modal-content{
+    width:800px;
+    margin-top:40px;
+    background:#020617;
+    padding:25px;
+    border-radius:12px;
+    max-height:85vh;
+    overflow:auto;
+    line-height:1.8;
+}
+
+h3{color:#60a5fa;}
+
+/* 手机适配 */
+@media(max-width:768px){
+    .container{flex-direction:column;}
+    .sidebar{display:none;}
+    .modal-content{width:95%;}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+<div class="logo">
+<img src="logo.png">
+<b>Python智解库 · 终极版</b>
+</div>
+
+<div class="navbar">
+<div onclick="setMode('life')">生活问题</div>
+<div onclick="setMode('industry')">行业分析</div>
+<div onclick="setMode('career')">工程师发展</div>
+<div onclick="window.location.href='xxx.html'">关于我们</div>
+</div>
+</div>
+
+<div class="container">
+
+<!-- 分类 -->
+<div class="sidebar" id="nav"></div>
+
+<!-- 主体 -->
+<div class="main">
+<input id="search" class="search" placeholder="搜索（支持全文）">
+<div class="grid" id="list"></div>
+</div>
+
+</div>
+
+<!-- 弹窗 -->
+<div class="modal" id="modal">
+<div class="modal-content">
+<h2 id="title"></h2>
+<p id="desc"></p>
+<h3>解决步骤</h3>
+<p id="steps"></p>
+<h3>深度分析</h3>
+<p id="knowledge"></p>
+<button onclick="modal.style.display='none'">关闭</button>
+</div>
+</div>
+
+<script>
+
+/* ===== 状态 ===== */
+let mode="life";
+let current="全部";
+
+/* ===== 分类 ===== */
+const categories=["文件","数据","自动","网络","工具"];
+
+/* ===== 自动生成50案例 ===== */
+const lifeData = Array.from({length:50}, (_,i)=>{
+    let c=categories[i%5];
+
+    return {
+        c:c,
+        t:`高级案例 ${i+1}：${c}自动化解决方案`,
+        d:`该案例聚焦${c}问题，解决现实中的效率瓶颈。`,
+        steps:generateSteps(c,i),
+        k:generateKnowledge(c,i)
+    }
+});
+
+/* 行业 */
+const industryData=[
+{t:"AI趋势",d:"AI改变世界",steps:"分析发展",k:"AI是未来核心"},
+{t:"软件行业",d:"需求增长",steps:"学习提升",k:"工程师需求持续增长"}
+];
+
+/* 工程师 */
+const careerData=[
+{t:"成长路线",d:"从入门到专家",steps:"基础→项目→架构",k:"工程师是未来核心职业"}
+];
+
+/* 内容生成 */
+function generateSteps(c,i){
+return `第一步：分析${c}问题背景。
+第二步：拆解任务结构。
+第三步：设计自动化逻辑。
+第四步：实现代码处理。
+第五步：测试优化系统。
+第六步：部署自动运行。
+第七步：持续优化。`;
+}
+
+function generateKnowledge(c,i){
+return `${c}问题在现代社会中非常常见。Python提供了强大的工具来解决这些问题。
+
+工程师的核心能力是将复杂问题转化为可执行流程，并通过程序自动完成。
+
+未来趋势：
+自动化 + AI将成为主流，工程师价值持续提升。`;
+}
+
+/* 分类渲染 */
+function renderNav(){
+    nav.innerHTML=["全部",...categories].map(c=>
+        `<div onclick="setCat('${c}')">${c}</div>`
+    ).join("");
+}
+
+function setCat(c){
+    current=c;
+    render();
+}
+
+/* 渲染 */
+function render(){
+
+let s=search.value.toLowerCase();
+
+let data = mode==="life"?lifeData:
+mode==="industry"?industryData:careerData;
+
+list.innerHTML=data.filter(d=>{
+return (current==="全部"||d.c===current)
+&& (
+d.t.toLowerCase().includes(s)
+|| d.d.toLowerCase().includes(s)
+|| d.k.toLowerCase().includes(s)
+);
+}).map(d=>`
+<div class="card" onclick="openModal('${d.t}')">
+<h3>${d.t}</h3>
+<p>${d.d}</p>
+</div>`).join("");
+}
+
+/* 弹窗 */
+function openModal(t){
+let data = mode==="life"?lifeData:
+mode==="industry"?industryData:careerData;
+
+let d=data.find(x=>x.t===t);
+
+title.innerText=d.t;
+desc.innerText=d.d;
+steps.innerText=d.steps;
+knowledge.innerText=d.k;
+
+modal.style.display="flex";
+}
+
+/* 模式切换 */
+function setMode(m){
+mode=m;
+current="全部";
+render();
+}
+
+search.oninput=render;
+
+/* 初始化 */
+renderNav();
+render();
+
+</script>
+
+</body>
+</html>
